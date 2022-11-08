@@ -1,0 +1,42 @@
+
+.App {
+    background-color: white;
+  }
+  
+  .Auth-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  .Auth-form {
+    width: 620px;
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 8px;
+    background-color: white;
+  }
+
+  .Auth-form-title {
+    text-align: center;
+    font-weight: 800;
+  }
+  
+  .input-label {
+    font-weight: 600;
+  }
+
+  .input-country-code {
+    border: none;
+    background-color: white;
+    max-width: 50px;
+  }
+
+  .input-country-code:focus {
+    border: none;
+    outline: none;
+    background-color: white;
+  }
