@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   MDBContainer,
-  MDBInput,
   MDBCheckbox,
   MDBBtn,
   MDBIcon,
@@ -14,14 +13,15 @@ import { Link } from "react-router-dom";
 import countrylabels from "../../../utils/countryCodes";
 import * as Yup from "yup";
 import { ErrorMessage, Form, Formik } from "formik";
-import { encryptPassword } from "../../../utils/encrypt";
+import { toasts } from "../../../utils/toast";
+
 
 const Login = () => {
   const dispatch = useDispatch();
 
   const initialValues = {
-    mobile: "+91",
-    countryCode: "",
+    mobile: "",
+    countryCode: "+91",
     password: "",
     rememberPassword: false,
   };
@@ -33,8 +33,7 @@ const Login = () => {
 
   const loginHandler = (values) => {
     console.log(values);
-    encryptPassword(values.password);
-    // dispatch(loginFetch(values));
+    dispatch(loginFetch(values));
   };
 
   return (
@@ -110,7 +109,7 @@ const Login = () => {
                   <a href="!#">Forgot password?</a>
                 </div>
 
-                <MDBBtn className="mb-4">Sign in</MDBBtn>
+                <MDBBtn className="mb-4" type="submit">Sign in</MDBBtn>
 
                 <div className="text-center">
                   <p>
