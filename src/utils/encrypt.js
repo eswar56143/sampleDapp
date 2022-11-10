@@ -1,37 +1,58 @@
-import { argon2id } from "hash-wasm";
 import { nanoid } from "nanoid";
+import { pbkdf2 } from "pbkdf2";
+const config = {
+  hashBytes: 32,
+  iterations: 72000,
+};
 
 export const encryptPassword = async (password) => {
   try {
-    const salt = nanoid(32);
-    const key = await argon2id({
-      password: password,
-      salt, // salt is a buffer containing random bytes
-      parallelism: 1,
-      iterations: 256,
-      memorySize: 512, // use 512KB memory
-      hashLength: 32, // output size = 32 bytes
-      outputType: "encoded", // return standard encoded string containing parameters needed to verify the key
+    const encryptor = new Promise((resolve, reject) => {
+      const salt = nanoid(32);
+      const callback = (pbkdf2Error, key) => {
+        if (pbkdf2Error) {
+          return reject(pbkdf2Error);
+        }
+        resolve({ salt, key: key.toString("hex") });
+      };
+
+      pbkdf2(
+        password,
+        salt,
+        config.iterations,
+        config.hashBytes,
+        "sha512",
+        callback
+      );
     });
-    console.log(salt);
-    return { salt, key };
+
+    return encryptor;
   } catch (error) {
     console.log(error);
   }
 };
 
-export const encryptLoginPassword = async (password, salt) => {
+export const encryptLoginPassword = async (data, salt) => {
   try {
-    const key = await argon2id({
-      password: password,
-      salt, // salt is a buffer containing random bytes
-      parallelism: 1,
-      iterations: 256,
-      memorySize: 512, // use 512KB memory
-      hashLength: 32, // output size = 32 bytes
-      outputType: "encoded", // return standard encoded string containing parameters needed to verify the key
+    const executor = new Promise((resolve, reject) => {
+      const callback = async (error, key) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(key.toString('hex'));
+      };
+
+      pbkdf2(
+        data,
+        salt,
+        config.iterations,
+        config.hashBytes,
+        "sha512",
+        callback
+      );
     });
-    return key;
+
+    return executor;
   } catch (error) {
     console.log(error);
   }

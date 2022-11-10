@@ -13,9 +13,6 @@ const formatUrl = (url, params) => {
 const instance = axios.create({
   baseURL: PUBLIC_URL,
   withCredentials: false,
-  headers: {
-    "content-type": "application/json",
-  },
 });
 
 /** POST Request */
@@ -27,6 +24,7 @@ export const httpPost = (url, header, data, params = {}) =>
         resolve(res);
       })
       .catch((error) => {
+        console.log(error);
         resolve(error.response);
       });
   });
@@ -34,13 +32,13 @@ export const httpPost = (url, header, data, params = {}) =>
 /** GET Request */
 export const httpGet = async (url, header, params) =>
   new Promise((resolve) => {
-    console.log(url);
     instance
       .get(formatUrl(url, params), { headers: header })
       .then((res) => {
         resolve(res);
       })
       .catch((error) => {
+        console.log(error);
         resolve(error.response);
       });
   });
