@@ -2,6 +2,7 @@ import { ErrorMessage, Form, Formik } from "formik";
 import { MDBContainer, MDBInputGroup } from "mdb-react-ui-kit";
 import React from "react";
 import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { registerFetch } from "../../../redux/user/reducer";
 import { FORMIK_REGEX } from "../../../utils/constants";
@@ -10,6 +11,7 @@ import "./register.css";
 
 const Register = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const initialValues = {
     fullName: "",
@@ -63,8 +65,11 @@ const Register = () => {
     ),
   });
 
+  const registerCallback = () => {
+    navigate("/login");
+  };
   const registerHandler = (values) => {
-    dispatch(registerFetch(values));
+    dispatch(registerFetch({ values, registerCallback }));
   };
 
   return (
@@ -262,6 +267,9 @@ const Register = () => {
                 </button>
 
                 <div className="text-center">
+                  <p>
+                    Already have an account? <Link to="/login">Login</Link>
+                  </p>
                   <p>or sign up with:</p>
                   <button
                     type="button"

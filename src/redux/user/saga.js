@@ -3,22 +3,25 @@ import { httpGet, httpPost } from "../../utils/axiosConnect";
 import { PUBLIC_URL, STATUS_CODE } from "../../utils/constants";
 import { encryptLoginPassword, encryptPassword } from "../../utils/encrypt";
 import { toasts } from "../../utils/toast";
-import { saveLoginDaetails } from "./persistReducer";
+import { clearLoginDaetails, saveLoginDaetails } from "./persistReducer";
 import {
   loginFailure,
   loginSuccess,
+  logoutFailure,
+  logoutSuccess,
   registerFailure,
   registerSuccess,
 } from "./reducer";
 
 function* loginSaga({ payload }) {
   try {
-    const response = yield httpPost(
-      `${PUBLIC_URL}/login`,
-      {},
-      { mobileNumber: payload.mobile, password: payload.password }
-    );
-    if (response.status === STATUS_CODE.successful) {
+    const data = {
+      contact: payload?.mode === 0 ? payload.username : payload.mobile,
+      password: payload.key,
+    };
+    const response = yield httpPost(`${PUBLIC_URL}/login`, {}, data);
+    if (response?.status === STATUS_CODE.successful) {
+      toasts.success(response?.data?.message);
       yield put(saveLoginDaetails(response?.data));
       yield put(loginSuccess());
     } else {
@@ -33,12 +36,13 @@ function* loginSaga({ payload }) {
 
 function* saltSaga({ payload }) {
   try {
+    const data = payload?.mode === 0 ? payload.username : payload.mobile;
     const response = yield httpGet(
       `${PUBLIC_URL}/salt`,
       {},
-      { mobileNumber: payload.mobile }
+      { contact: data, mode: payload?.mode }
     );
-    if (response.status === STATUS_CODE.successful) {
+    if (response?.status === STATUS_CODE.successful) {
       const key = yield encryptLoginPassword(
         payload.password,
         response?.data?.salt
@@ -47,7 +51,7 @@ function* saltSaga({ payload }) {
         key + response?.data?.userId,
         response?.data?.salt
       );
-      payload.password = password;
+      payload.key = password;
       yield loginSaga({ payload });
     } else {
       toasts.error(response?.data?.message);
@@ -61,9 +65,9 @@ function* saltSaga({ payload }) {
 
 function* registerSaga({ payload }) {
   try {
-    const { salt, key } = yield encryptPassword(payload?.password);
+    const { salt, key } = yield encryptPassword(payload?.values?.password);
     const { fullName, username, mobile, countryCode, email, acceptTerms } =
-      payload;
+      payload.values;
     const body = {
       fullName,
       username,
@@ -75,10 +79,11 @@ function* registerSaga({ payload }) {
       acceptTerms,
     };
     const response = yield httpPost(`${PUBLIC_URL}/register`, {}, body);
-    if (response.status === STATUS_CODE.successful) {
+    if (response?.status === STATUS_CODE.successful) {
       yield put(registerSuccess(body));
+      yield put(payload.registerCallback());
     } else {
-      toasts.error(response?.data?.message);
+      toasts.error(response?.data?.message || "something went wrong!I");
       yield put(registerFailure());
     }
   } catch (error) {
@@ -87,9 +92,21 @@ function* registerSaga({ payload }) {
   }
 }
 
+function* logoutSaga() {
+  try {
+    toasts.success('Successfully logged out')
+    yield put(logoutSuccess());
+    yield put(clearLoginDaetails());
+  } catch (error) {
+    toasts.error(error?.message);
+    yield put(logoutFailure());
+  }
+}
+
 function* userSaga() {
   yield takeEvery("userReducer/loginFetch", saltSaga);
   yield takeEvery("userReducer/registerFetch", registerSaga);
+  yield takeEvery("userReducer/logoutFetch", logoutSaga);
 }
 
 export default userSaga;

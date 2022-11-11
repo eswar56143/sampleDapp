@@ -30,6 +30,18 @@ export const userSlice = createSlice({
     registerFailure: (state) => {
       state.isLoading = false;
     },
+
+    // logout
+    logoutFetch: (state) => {
+      state.isLoading = true;
+    },
+    logoutSuccess: (state, action) => {
+      state.isLoading = false;
+      state.userDaetails = {};
+    },
+    logoutFailure: (state) => {
+      state.isLoading = false;
+    },
   },
 });
 
@@ -37,8 +49,13 @@ export const {
   loginFetch,
   loginSuccess,
   loginFailure,
+
   registerFetch,
   registerSuccess,
   registerFailure,
+
+  logoutFetch,
+  logoutSuccess,
+  logoutFailure,
 } = userSlice.actions;
 export default userSlice.reducer;
